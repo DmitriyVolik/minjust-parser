@@ -6,4 +6,8 @@
         <RootNamespace>minjust_parser</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Selenium.WebDriver" Version="4.1.0" />
+    </ItemGroup>
+
 </Project>
