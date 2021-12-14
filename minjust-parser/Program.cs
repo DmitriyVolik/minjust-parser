@@ -14,6 +14,9 @@ namespace minjust_parser
         private static IWebDriver driver;
         static void Main(string[] args)
         {
+
+            /*Helpers.ExcelHelper.Read();*/
+
             driver = new ChromeDriver();
 
             driver.Navigate().GoToUrl(ParserSettings.Url);
