@@ -5,7 +5,6 @@ namespace minjust_parser.Models
         public int orderNum { get; set; }
         
         public string name { get; set; }
-        
         public string value { get; set; }
     }
 }
