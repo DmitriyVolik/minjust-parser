@@ -1,6 +1,4 @@
 ﻿using minjust_parser.Core.Services;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using minjust_parser.Models;
+using Newtonsoft.Json;
 using TwoCaptcha.Captcha;
 using Captcha = minjust_parser.Core.Services.Captcha;
 
@@ -29,28 +29,51 @@ namespace minjust_parser.Core
         public void Start()
         {
             var captchaToken = captcha.SolveReCaptcha();
-            //Console.WriteLine(captchaToken);
+            Console.WriteLine(captchaToken);
             
-            WebRequest request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={IdNumbers[0]}&c={captchaToken}");
+            WebRequest request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person=0000000001&c={captchaToken}");
             WebResponse response = request.GetResponse();
-            
-            string responseStr = "";
+
+            string responseStr;
             
             using (Stream stream = response.GetResponseStream())
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    
-                    while ((reader.ReadLine()) != null)
-                    {
-                        responseStr += reader.ReadLine();
-                    }
+                    responseStr = reader.ReadToEnd();
                 }     
             }
-            Console.WriteLine(responseStr); 
+            response.Close();
 
-            Console.WriteLine(HttpUtility.UrlEncode("Y7jDYHydLkYF0Nmb8KKcf6QOqZEFdYSFfjlbUmMl7zZyViv10jHCs8P+hp6pujWkfOpgcFplKcb5mJrYN4uOEA=="));
-            //response.Close();
+            var output = Helpers.GetRFID(responseStr);
+            
+            for (int i = 0; i < output.Count; i++)
+            {
+                request=WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(output[i])}");
+                response=request.GetResponse();
+                
+                string tempResponse;
+                
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        tempResponse = reader.ReadToEnd();
+                    }     
+                }
+                response.Close();
+                
+                Console.WriteLine(tempResponse);
+
+                var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
+
+                foreach (var item in person)
+                {
+                    Console.WriteLine(item.value);
+                }
+                
+            }
+
             Console.WriteLine("Запрос выполнен");
         }
     }
