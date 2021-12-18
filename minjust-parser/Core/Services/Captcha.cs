@@ -23,19 +23,15 @@ namespace minjust_parser.Core.Services
             ReCaptcha captcha = new ReCaptcha();
             captcha.SetSiteKey("6LdStXoUAAAAAE2oEyZLHgu3dBE-WV1zOvZon7_v");
             captcha.SetUrl("https://usr.minjust.gov.ua/content/free-search");
-            //captcha.SetAction("verify");
-            //captcha.SetInvisible(true);
 
             try
             {
-                Console.WriteLine("Капча отправлена на решение!");
                 client.Solve(captcha).Wait();
-                Console.WriteLine("Капча решена!");
                 return captcha.Code;
             }
             catch (Exception)
             {
-                Console.WriteLine("Ошибка");
+                Console.WriteLine("Captcha Error");
                 return null;
             }
         }

@@ -1,11 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Text;
-using System.Threading;
-using minjust_parser.Core;
-using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
+﻿using minjust_parser.Core;
 
 namespace minjust_parser
 {
@@ -13,6 +6,8 @@ namespace minjust_parser
     {
         static void Main(string[] args)
         {
+            var app = new Application();
+            app.Start();
         }
     }
 }
