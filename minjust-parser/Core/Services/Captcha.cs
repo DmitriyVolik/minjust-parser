@@ -25,14 +25,12 @@ namespace minjust_parser.Core.Services
             captcha.SetUrl("https://usr.minjust.gov.ua/content/free-search");
             try
             {
-                Console.WriteLine("Капча отправлена на решение!");
                 client.Solve(captcha).Wait();
-                Console.WriteLine("Капча решена!");
                 return captcha.Code;
             }
             catch (Exception)
             {
-                Console.WriteLine("Ошибка");
+                Console.WriteLine("Captcha Error");
                 return null;
             }
         }
