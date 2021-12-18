@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using minjust_parser.Core.Workers;
+using minjust_parser.Models;
 
 
 namespace minjust_parser.Core
@@ -18,7 +20,7 @@ namespace minjust_parser.Core
         public Application()
         {
             captcha = new Captcha(ParserSettings.captchaServiceKey);
-            IdNumbers=Excel.Read();
+            //IdNumbers=Excel.Read();
         }
 
         public Captcha captcha { get; set; }
@@ -64,14 +66,8 @@ namespace minjust_parser.Core
                 response.Close();
                 
                 Console.WriteLine(tempResponse);
-
                 var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
-
-                foreach (var item in person)
-                {
-                    Console.WriteLine(item.value);
-                }
-                
+                Excel.Write(person, "writeTest.xlsx", 2, "0000000001");
             }
 
             Console.WriteLine("Запрос выполнен");
