@@ -23,7 +23,6 @@ namespace minjust_parser.Core.Services
             ReCaptcha captcha = new ReCaptcha();
             captcha.SetSiteKey("6LdStXoUAAAAAE2oEyZLHgu3dBE-WV1zOvZon7_v");
             captcha.SetUrl("https://usr.minjust.gov.ua/content/free-search");
-
             try
             {
                 client.Solve(captcha).Wait();

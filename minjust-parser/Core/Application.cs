@@ -8,26 +8,26 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using minjust_parser.Models;
-using Newtonsoft.Json;
-using TwoCaptcha.Captcha;
-using Captcha = minjust_parser.Core.Services.Captcha;
+
 
 namespace minjust_parser.Core
 {
     public class Application
     {
+
         public Application()
         {
             captcha = new Captcha(ParserSettings.captchaServiceKey);
             IdNumbers=Excel.Read();
         }
+
         public Captcha captcha { get; set; }
 
         public List<string> IdNumbers { get; set; }
 
         public void Start()
         {
+
             var captchaToken = captcha.SolveReCaptcha();
             Console.WriteLine(captchaToken);
             
@@ -75,6 +75,11 @@ namespace minjust_parser.Core
             }
 
             Console.WriteLine("Запрос выполнен");
+
+            ThreadWorker worker = new ThreadWorker(ParserSettings.TestValue);
+            Thread thread = new Thread(new ThreadStart(worker.StartThread));
+            thread.Start();
+
         }
     }
 }

@@ -6,7 +6,9 @@ namespace minjust_parser
     {
         static void Main(string[] args)
         {
-            var app = new Application();
+
+            Application app = new Application();
+
             app.Start();
         }
     }
