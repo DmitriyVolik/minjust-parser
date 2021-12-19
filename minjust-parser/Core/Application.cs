@@ -31,9 +31,9 @@ namespace minjust_parser.Core
             }
             try
             {
-                IdNumbers=Excel.Read();
+                IdNumbers=Excel.Read(config);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Входной файл не найден, укажите правильный путь в config.json");
                 throw;
@@ -43,14 +43,14 @@ namespace minjust_parser.Core
         public Captcha captcha = null;
 
         public List<string> IdNumbers = new List<string>();
-
+        public List<string> ParsedNumbers = new List<string>();
         public void Start()
         {
             Excel.WriteStartPattern(config.FilePathOutput);
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < config.ThreadCount; i++)
             {
-                ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref IdNumbers);
+                ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref IdNumbers, ref ParsedNumbers);
                 Thread thread = new Thread(new ThreadStart(worker.StartThread));
                 thread.Start();
                 Thread.Sleep(1000);
