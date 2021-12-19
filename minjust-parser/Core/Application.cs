@@ -29,12 +29,9 @@ namespace minjust_parser.Core
             {
                 throw;
             }
-
-            IdNumbers=Excel.Read(config);
-            ParsedNumbers = Excel.ReadOutput(config.FilePathOutput, 2);
             try
             {
-                IdNumbers=Excel.Read();
+                IdNumbers=Excel.Read(config);
             }
             catch (Exception e)
             {

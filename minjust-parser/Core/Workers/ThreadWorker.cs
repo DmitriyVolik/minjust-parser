@@ -74,10 +74,7 @@ namespace minjust_parser.Core.Workers
 
                         request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
 
-                request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person=0000000001&c={captchaToken}");
-                //request.Proxy = proxy;
-                WebResponse response = request.GetResponse();
-
+                        request.Proxy = proxy;
 
                         if (config.IsProxy) request.Proxy = proxy;
 
@@ -116,7 +113,16 @@ namespace minjust_parser.Core.Workers
                             var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
                             if (person.Count != 0)
                             {
-                                Excel.Write(person, config.FilePathOutput, config.PersonOutCounter + 2, WorkIdentityNumber);
+                                try
+                                {
+                                    Excel.Write(person, config.FilePathOutput, config.PersonOutCounter + 2, WorkIdentityNumber);
+                                }
+                                catch (Exception)
+                                {
+                                    Console.WriteLine("Файл для записи не найден, укажите правильный путь в config.json");
+                                    throw;
+                                }
+
                                 Console.WriteLine(config.PersonOutCounter);
                                 Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
                                 config.PersonOutCounter++;
@@ -130,21 +136,6 @@ namespace minjust_parser.Core.Workers
 
                         Console.WriteLine($"{WorkIdentityNumber} уже содержится в {config.FilePathOutput}");
                         continue;
-
-                        try
-                        {
-                            Excel.Write(person, config.FilePathOutput, config.PersonCounter, WorkIdentityNumber);
-                        }
-                        catch (Exception)
-                        {
-                            Console.WriteLine("Файл для записи не найден, укажите правильный путь в config.json");
-                            throw;
-                        }
-                        Console.WriteLine(config.PersonCounter);
-                        Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
-                        config.PersonCounter++;
-                        FileWorker.SaveConfig(config);
-
                     }
                 }
                 catch (Exception)
