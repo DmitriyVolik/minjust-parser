@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Web;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace minjust_parser.Core.Workers
 {
@@ -91,6 +92,7 @@ namespace minjust_parser.Core.Workers
                         }
                         response.Close();
 
+                        
                         var output = Helpers.GetRFID(responseStr);
 
                         for (int i = 0; i < output.Count; i++)
@@ -130,10 +132,16 @@ namespace minjust_parser.Core.Workers
                                 FileWorker.SaveConfig(config);
                             }
                         }
+                        
+                        if (output.Count==0)
+                        {
+                            Excel.Write(null, config.FilePathOutput, config.PersonOutCounter + 2,
+                                WorkIdentityNumber, true);
+                            config.PersonOutCounter++;
+                        }
                     }
                     else
                     {
-
                         Console.WriteLine($"{WorkIdentityNumber} уже содержится в {config.FilePathOutput}");
                         continue;
                     }
