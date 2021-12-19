@@ -20,16 +20,24 @@ namespace minjust_parser.Core
         public Application()
         {
             config = FileWorker.LoadConfig().Result;
+            
             try
             {
                 captcha = new Captcha(config.CaptchaApiId);
             }
             catch (Exception)
             {
-
                 throw;
             }
-            IdNumbers=Excel.Read();
+            try
+            {
+                IdNumbers=Excel.Read();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Входной файл не найден, укажите правильный путь в config.json");
+                throw;
+            }
         }
         public Config config = null;
         public Captcha captcha = null;
