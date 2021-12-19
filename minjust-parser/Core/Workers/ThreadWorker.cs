@@ -3,11 +3,8 @@ using minjust_parser.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 
 namespace minjust_parser.Core.Workers
@@ -74,7 +71,13 @@ namespace minjust_parser.Core.Workers
                         Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Капча для {WorkIdentityNumber} решена!");
                         Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Начинаю парсинг данных для {WorkIdentityNumber}.");
 
+
                         request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
+
+                request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person=0000000001&c={captchaToken}");
+                //request.Proxy = proxy;
+                WebResponse response = request.GetResponse();
+
 
                         if (config.IsProxy) request.Proxy = proxy;
 
@@ -124,8 +127,24 @@ namespace minjust_parser.Core.Workers
                     }
                     else
                     {
+
                         Console.WriteLine($"{WorkIdentityNumber} уже содержится в {config.FilePathOutput}");
                         continue;
+
+                        try
+                        {
+                            Excel.Write(person, config.FilePathOutput, config.PersonCounter, WorkIdentityNumber);
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine("Файл для записи не найден, укажите правильный путь в config.json");
+                            throw;
+                        }
+                        Console.WriteLine(config.PersonCounter);
+                        Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
+                        config.PersonCounter++;
+                        FileWorker.SaveConfig(config);
+
                     }
                 }
                 catch (Exception)
