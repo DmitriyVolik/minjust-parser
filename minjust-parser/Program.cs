@@ -1,4 +1,4 @@
-﻿using System;
+﻿using minjust_parser.Core;
 
 namespace minjust_parser
 {
@@ -6,7 +6,8 @@ namespace minjust_parser
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Application app = new Application();
+            app.Start();
         }
     }
 }

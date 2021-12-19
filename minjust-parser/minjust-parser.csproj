@@ -6,4 +6,12 @@
         <RootNamespace>minjust_parser</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="2captcha-csharp" Version="1.1.0" />
+      <PackageReference Include="DocumentFormat.OpenXml" Version="2.15.0" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+
+    </ItemGroup>
+
 </Project>
