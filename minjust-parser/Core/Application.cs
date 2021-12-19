@@ -33,7 +33,7 @@ namespace minjust_parser.Core
             {
                 IdNumbers=Excel.Read(config);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Console.WriteLine("Входной файл не найден, укажите правильный путь в config.json");
                 throw;
