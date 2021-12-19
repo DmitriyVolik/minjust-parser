@@ -19,63 +19,34 @@ namespace minjust_parser.Core
 
         public Application()
         {
-            captcha = new Captcha(ParserSettings.captchaServiceKey);
-            //IdNumbers=Excel.Read();
+            config = FileWorker.LoadConfig().Result;
+            try
+            {
+                captcha = new Captcha(config.CaptchaApiId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            IdNumbers=Excel.Read();
         }
+        public Config config = null;
+        public Captcha captcha = null;
 
-        public Captcha captcha { get; set; }
-
-        public List<string> IdNumbers { get; set; }
+        public List<string> IdNumbers = new List<string>();
 
         public void Start()
         {
+            Excel.WriteStartPattern(config.FilePathOutput);
 
-            var captchaToken = captcha.SolveReCaptcha();
-            Console.WriteLine(captchaToken);
-            
-            WebRequest request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person=0000000001&c={captchaToken}");
-            WebResponse response = request.GetResponse();
-
-            string responseStr;
-            
-            using (Stream stream = response.GetResponseStream())
+            for (int i = 0; i < 1; i++)
             {
-                using (StreamReader reader = new StreamReader(stream))
-                {
-                    responseStr = reader.ReadToEnd();
-                }     
+                ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref IdNumbers);
+                Thread thread = new Thread(new ThreadStart(worker.StartThread));
+                thread.Start();
+                Thread.Sleep(1000);
             }
-            response.Close();
-
-            var output = Helpers.GetRFID(responseStr);
-            
-            for (int i = 0; i < output.Count; i++)
-            {
-                request=WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(output[i])}");
-                response=request.GetResponse();
-                
-                string tempResponse;
-                
-                using (Stream stream = response.GetResponseStream())
-                {
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        tempResponse = reader.ReadToEnd();
-                    }     
-                }
-                response.Close();
-                
-                Console.WriteLine(tempResponse);
-                var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
-                Excel.Write(person, "writeTest.xlsx", 2, "0000000001");
-            }
-
-            Console.WriteLine("Запрос выполнен");
-
-            ThreadWorker worker = new ThreadWorker(ParserSettings.TestValue);
-            Thread thread = new Thread(new ThreadStart(worker.StartThread));
-            thread.Start();
-
         }
     }
 }

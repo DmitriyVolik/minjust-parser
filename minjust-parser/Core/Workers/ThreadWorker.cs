@@ -1,7 +1,12 @@
-﻿using System;
+﻿using minjust_parser.Core.Services;
+using minjust_parser.Models;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 
@@ -9,14 +14,94 @@ namespace minjust_parser.Core.Workers
 {
     public class ThreadWorker
     {
-        public ThreadWorker(string IdentityNumber)
+        public ThreadWorker(ref Config config, ref Captcha captcha, ref List<string> IdentityNumbers)
         {
-
+            this.config = config;
+            this.captcha = captcha;
+            this.IdentityNumbers = IdentityNumbers;
         }
-
+        Captcha captcha { get; set; } = null;
+        Config config { get; set; } = null;
+        List<string> IdentityNumbers { get; set; } = null;
+        string WorkIdentityNumber { get; set; } = "";
+        //WebProxy proxy { get; set; } = null;
+        Random rand = new Random();
+        WebRequest request = null;
         public void StartThread()
         {
-            Console.WriteLine(HttpUtility.UrlEncode("Y7jDYHydLkYF0Nmb8KKcf6QOqZEFdYSFfjlbUmMl7zZyViv10jHCs8P+hp6pujWkfOpgcFplKcb5mJrYN4uOEA=="));
+            while (IdentityNumbers.Count > 0)
+            {
+                //try
+                //{
+                //    Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение со случайным прокси сервером...");
+                //    proxy = new WebProxy(config.Proxy[rand.Next(0, config.Proxy.Count - 1)]);
+                //    request = WebRequest.Create("https://google.com");
+                //    request.Proxy = proxy;
+                //    WebResponse response1 = request.GetResponse();
+                //}
+                //catch (Exception)
+                //{
+                //    Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение с прокси сервером {proxy.Address} не удалось!");
+                //    continue;
+                //}
+                //Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение с прокси сервером {proxy.Address} установлено!");
+
+                WorkIdentityNumber = IdentityNumbers[0];
+                IdentityNumbers.RemoveAt(0);
+
+                Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров");
+                Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Решаю капчу для {WorkIdentityNumber}...");
+
+                var captchaToken = captcha.SolveReCaptcha();
+
+                Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Капча для {WorkIdentityNumber} решена!");
+                Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Начинаю парсинг данных для {WorkIdentityNumber}.");
+
+                request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
+                //request.Proxy = proxy;
+                WebResponse response = request.GetResponse();
+
+                string responseStr;
+
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        responseStr = reader.ReadToEnd();
+                    }
+                }
+                response.Close();
+
+                var output = Helpers.GetRFID(responseStr);
+
+                for (int i = 0; i < output.Count; i++)
+                {
+                    request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(output[i])}");
+                    response = request.GetResponse();
+
+                    string tempResponse;
+
+                    using (Stream stream = response.GetResponseStream())
+                    {
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            tempResponse = reader.ReadToEnd();
+                        }
+                    }
+                    response.Close();
+
+                    Console.WriteLine(tempResponse);
+                    var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
+                    if (person.Count != 0)
+                    {
+                        Excel.Write(person, "writeTest.xlsx", config.PersonCounter, WorkIdentityNumber);
+                        Console.WriteLine(config.PersonCounter);
+                        FileWorker.SaveConfig(config);
+                        Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
+                        config.PersonCounter++;
+                    }
+                }
+            }
         }
     }
 }

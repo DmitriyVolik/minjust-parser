@@ -10,6 +10,10 @@ namespace minjust_parser.Core.Workers
     {
         public static async Task<Config> LoadConfig()
         {
+            if (!File.Exists("config.json"))
+            {
+                SaveConfig(new Config());
+            }
             return JsonWorker<Config>.JsonToObj(await File.ReadAllTextAsync("config.json"));
         }
 

@@ -35,7 +35,7 @@ namespace minjust_parser.Core.Services
                         {
                             break;
                         }
-                        Console.WriteLine(c.CellValue.Text);
+                        Console.WriteLine($"ИНН {c.CellValue.Text} добавлен в очередь для парсинга.");
                         text = c.CellValue.Text;
                         data.Add(text);
                     }
@@ -45,7 +45,7 @@ namespace minjust_parser.Core.Services
             return data;
         }
 
-        public static void Write(List<PersonData> pd, string filePath, int count, string idNumber)
+        public static void Write(List<PersonData> pd, string filePath, long count, string idNumber)
         {
             using (SpreadsheetDocument spreadSheet = SpreadsheetDocument.Open(filePath, true))
             {
@@ -264,7 +264,6 @@ namespace minjust_parser.Core.Services
                 
                 // Save the new worksheet.
                 worksheetPart.Worksheet.Save();
-                
             }
         }
     }
