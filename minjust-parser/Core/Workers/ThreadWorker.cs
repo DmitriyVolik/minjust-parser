@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Web;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace minjust_parser.Core.Workers
 {
@@ -62,11 +63,19 @@ namespace minjust_parser.Core.Workers
 
                 Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
 
+          
+
+
                 try
                 {
                     if (!ParsedNumbers.Contains(WorkIdentityNumber))
                     {
+
                         Console.WriteLine($"Решаю капчу для {WorkIdentityNumber}...");
+
+                  
+                        
+
                         var captchaToken = captcha.SolveReCaptcha();
 
                         Console.WriteLine($"Капча для {WorkIdentityNumber} решена!", ConsoleColor.Green);
@@ -92,6 +101,7 @@ namespace minjust_parser.Core.Workers
                         }
                         response.Close();
 
+                        
                         var output = Helpers.GetRFID(responseStr);
 
                         for (int i = 0; i < output.Count; i++)
@@ -127,13 +137,18 @@ namespace minjust_parser.Core.Workers
                                 Console.WriteLine($"Данные { WorkIdentityNumber} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
                                 config.PersonOutCounter++;
                                 ParsedNumbers.Add(WorkIdentityNumber);
+                                FileWorker.WriteParsedNumber(WorkIdentityNumber);
                                 FileWorker.SaveConfig(config);
                             }
+                        }
+                        if (output.Count==0)
+                        {
+                            ParsedNumbers.Add(WorkIdentityNumber);
+                            FileWorker.WriteParsedNumber(WorkIdentityNumber);
                         }
                     }
                     else
                     {
-
                         Console.WriteLine($"{WorkIdentityNumber} уже содержится в {config.FilePathOutput}");
                         continue;
                     }
