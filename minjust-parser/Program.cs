@@ -18,7 +18,14 @@ namespace minjust_parser
         public static void WriteLine(dynamic input, System.ConsoleColor color = System.ConsoleColor.White)
         {
             string tempstr = $"[{System.DateTime.Now}]: {input}";
-            File.AppendAllTextAsync($"Logs/{System.DateTime.Now.Date.ToShortDateString()}.txt", tempstr + '\n');
+            try
+            {
+                File.AppendAllTextAsync($"Logs/{System.DateTime.Now.Date.ToShortDateString()}.txt", tempstr + '\n');
+            }
+            catch (System.Exception)
+            {
+
+            }
             System.Console.ForegroundColor = color;
             System.Console.WriteLine(tempstr);
             System.Console.ResetColor();
