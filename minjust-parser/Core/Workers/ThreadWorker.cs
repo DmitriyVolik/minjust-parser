@@ -137,6 +137,7 @@ namespace minjust_parser.Core.Workers
                         }
                         if (output.Count==0)
                         {
+                            Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
                             ParsedNumbers.Add(WorkIdentityNumber);
                             FileWorker.WriteParsedNumber(WorkIdentityNumber);
                         }
