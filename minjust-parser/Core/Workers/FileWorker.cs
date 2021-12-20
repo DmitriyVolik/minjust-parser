@@ -10,6 +10,10 @@ namespace minjust_parser.Core.Workers
 {
     public static class FileWorker
     {
+        public static void CreateAllDirestories()
+        {
+            Directory.CreateDirectory("Logs");
+        }
         public static async Task<Config> LoadConfig()
         {
             if (!File.Exists("config.json"))

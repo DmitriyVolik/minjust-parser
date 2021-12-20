@@ -54,7 +54,7 @@ namespace minjust_parser.Core
                 ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref IdNumbers, ref ParsedNumbers);
                 Thread thread = new Thread(new ThreadStart(worker.StartThread));
                 thread.Start();
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
             }
         }
     }
