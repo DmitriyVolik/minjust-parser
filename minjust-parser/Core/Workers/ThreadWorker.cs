@@ -63,24 +63,16 @@ namespace minjust_parser.Core.Workers
 
                 Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
 
-          
-
-
                 try
                 {
                     if (!ParsedNumbers.Contains(WorkIdentityNumber))
                     {
-
                         Console.WriteLine($"Решаю капчу для {WorkIdentityNumber}...");
-
-                  
-                        
 
                         var captchaToken = captcha.SolveReCaptcha();
 
                         Console.WriteLine($"Капча для {WorkIdentityNumber} решена!", ConsoleColor.Green);
                         Console.WriteLine($"Начинаю парсинг данных для {WorkIdentityNumber}.");
-
 
                         request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
 
@@ -101,7 +93,6 @@ namespace minjust_parser.Core.Workers
                         }
                         response.Close();
 
-                        
                         var output = Helpers.GetRFID(responseStr);
 
                         for (int i = 0; i < output.Count; i++)
@@ -135,6 +126,9 @@ namespace minjust_parser.Core.Workers
                                 }
 
                                 Console.WriteLine($"Данные { WorkIdentityNumber} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
+
+                                Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИЦИРОВАН И ЗАПИСАН КАК \"{person[0].value}\"", ConsoleColor.Yellow);
+
                                 config.PersonOutCounter++;
                                 ParsedNumbers.Add(WorkIdentityNumber);
                                 FileWorker.WriteParsedNumber(WorkIdentityNumber);

@@ -44,7 +44,6 @@ namespace minjust_parser.Core.Workers
             {
                 while ((str=sr.ReadLine())!=null)
                 {
-                    Console.WriteLine(str);
                     data.Add(str);
                 }
             }
@@ -54,10 +53,7 @@ namespace minjust_parser.Core.Workers
 
         public static void WriteParsedNumber(string number)
         {
-            using (StreamWriter sw = new StreamWriter("ParsedNumbers.txt"))
-            {
-                sw.WriteLine(number);
-            }
+            File.AppendAllTextAsync("ParsedNumbers.txt", number + '\n');
         }
     }
 }
