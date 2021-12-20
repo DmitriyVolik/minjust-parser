@@ -37,7 +37,7 @@ namespace minjust_parser.Core.Workers
                     {
                         try
                         {
-                            Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение со случайным прокси сервером...");
+                            Console.WriteLine($"Соединение со случайным прокси сервером...", ConsoleColor.Yellow);
                             proxy = new WebProxy(config.Proxy[rand.Next(0, config.Proxy.Count - 1)]);
                             request = WebRequest.Create("https://google.com");
                             request.Proxy = proxy;
@@ -45,14 +45,15 @@ namespace minjust_parser.Core.Workers
                         }
                         catch (Exception)
                         {
-                            Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение с прокси сервером {proxy.Address} не удалось!");
+                            Console.WriteLine($"Соединение с прокси сервером {proxy.Address} не удалось!", ConsoleColor.Red);
                             continue;
                         }
-                        Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Соединение с прокси сервером {proxy.Address} установлено!");
+                        Console.WriteLine($"Соединение с прокси сервером {proxy.Address} установлено!", ConsoleColor.Green);
                     }
                     else
                     {
-                        throw new Exception("Ошибка. При включенной опции IsProxy количество прокси серверов в списке Proxy не может быть равно нулю!");
+                        Console.WriteLine("Ошибка. При включенной опции IsProxy количество прокси серверов в списке Proxy не может быть равно нулю!", ConsoleColor.Red);
+                        throw new Exception();
                     }
                 }
 
@@ -60,18 +61,18 @@ namespace minjust_parser.Core.Workers
                 var temp = IdentityNumbers[0];
                 IdentityNumbers.RemoveAt(0);
 
-                Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров");
-                Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Решаю капчу для {WorkIdentityNumber}...");
+                Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
 
                 try
                 {
                     if (!ParsedNumbers.Contains(WorkIdentityNumber))
                     {
+                        Console.WriteLine($"Решаю капчу для {WorkIdentityNumber}...");
+
                         var captchaToken = captcha.SolveReCaptcha();
 
-                        Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Капча для {WorkIdentityNumber} решена!");
-                        Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Начинаю парсинг данных для {WorkIdentityNumber}.");
-
+                        Console.WriteLine($"Капча для {WorkIdentityNumber} решена!", ConsoleColor.Green);
+                        Console.WriteLine($"Начинаю парсинг данных для {WorkIdentityNumber}.");
 
                         request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
 
@@ -92,7 +93,6 @@ namespace minjust_parser.Core.Workers
                         }
                         response.Close();
 
-                        
                         var output = Helpers.GetRFID(responseStr);
 
                         for (int i = 0; i < output.Count; i++)
@@ -121,23 +121,25 @@ namespace minjust_parser.Core.Workers
                                 }
                                 catch (Exception)
                                 {
-                                    Console.WriteLine("Файл для записи не найден, укажите правильный путь в config.json");
+                                    Console.WriteLine("Файл для записи не найден, укажите правильный путь в config.json", ConsoleColor.Red);
                                     throw;
                                 }
 
-                                Console.WriteLine(config.PersonOutCounter);
-                                Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
+                                Console.WriteLine($"Данные { WorkIdentityNumber} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
+
+                                Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИЦИРОВАН И ЗАПИСАН КАК \"{person[0].value}\"", ConsoleColor.Yellow);
+
                                 config.PersonOutCounter++;
                                 ParsedNumbers.Add(WorkIdentityNumber);
+                                FileWorker.WriteParsedNumber(WorkIdentityNumber);
                                 FileWorker.SaveConfig(config);
                             }
                         }
-                        
                         if (output.Count==0)
                         {
-                            Excel.Write(null, config.FilePathOutput, config.PersonOutCounter + 2,
-                                WorkIdentityNumber, true);
-                            config.PersonOutCounter++;
+                            Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
+                            ParsedNumbers.Add(WorkIdentityNumber);
+                            FileWorker.WriteParsedNumber(WorkIdentityNumber);
                         }
                     }
                     else
