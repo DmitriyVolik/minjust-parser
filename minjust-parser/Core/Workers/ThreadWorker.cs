@@ -61,12 +61,13 @@ namespace minjust_parser.Core.Workers
                 IdentityNumbers.RemoveAt(0);
 
                 Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров");
-                Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Решаю капчу для {WorkIdentityNumber}...");
 
                 try
                 {
                     if (!ParsedNumbers.Contains(WorkIdentityNumber))
                     {
+                        Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Решаю капчу для {WorkIdentityNumber}...");
+                        
                         var captchaToken = captcha.SolveReCaptcha();
 
                         Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId}: Капча для {WorkIdentityNumber} решена!");
@@ -129,15 +130,14 @@ namespace minjust_parser.Core.Workers
                                 Console.WriteLine($"Поток { Thread.CurrentThread.ManagedThreadId}: Парсинг для { WorkIdentityNumber} завершен.");
                                 config.PersonOutCounter++;
                                 ParsedNumbers.Add(WorkIdentityNumber);
+                                FileWorker.WriteParsedNumber(WorkIdentityNumber);
                                 FileWorker.SaveConfig(config);
                             }
                         }
-                        
                         if (output.Count==0)
                         {
-                            Excel.Write(null, config.FilePathOutput, config.PersonOutCounter + 2,
-                                WorkIdentityNumber, true);
-                            config.PersonOutCounter++;
+                            ParsedNumbers.Add(WorkIdentityNumber);
+                            FileWorker.WriteParsedNumber(WorkIdentityNumber);
                         }
                     }
                     else
