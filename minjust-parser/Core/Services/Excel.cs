@@ -30,7 +30,7 @@ namespace minjust_parser.Core.Services
                             break;
                         }
 
-                        Console.WriteLine($"ИНН {c.CellValue.Text} добавлен в очередь для парсинга.");
+                        Console.WriteLine($"{c.CellValue.Text} добавлен в очередь для парсинга.");
                         text = c.CellValue.Text;
                         data.Add(text);
                     }
@@ -39,7 +39,7 @@ namespace minjust_parser.Core.Services
 
             return data;
         }
-        public static void Write(List<PersonData> pd, string filePath, long count, string idNumber, bool idOnly=false)
+        public static void Write(List<PersonData> pd, string filePath, long count, string idNumber)
         {
             using (SpreadsheetDocument spreadSheet = SpreadsheetDocument.Open(filePath, true))
             {
@@ -64,42 +64,20 @@ namespace minjust_parser.Core.Services
                 int index;
                 
                 uint rowIndex = Convert.ToUInt32(count);
-                
-                Cell cell1 = InsertCellInWorksheet("A", rowIndex, worksheetPart);
-                index = InsertSharedStringItem(idNumber, shareStringPart);
-                cell1.CellValue = new CellValue(index.ToString());
-                cell1.DataType = new EnumValue<CellValues>(CellValues.SharedString);
 
-                if (!idOnly)
+                string symbs="ABCDEFGHIJKL";
+
+                for (int i = 0; i < 12; i++)
                 {
-                    Cell cell2 = InsertCellInWorksheet("B", rowIndex, worksheetPart);
-                    Cell cell3 = InsertCellInWorksheet("C", rowIndex, worksheetPart);
-                    Cell cell4 = InsertCellInWorksheet("D", rowIndex, worksheetPart);
-                    Cell cell5 = InsertCellInWorksheet("E", rowIndex, worksheetPart);
-                    
-                    index = InsertSharedStringItem(pd[0].value, shareStringPart);
-                    cell2.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[1].value, shareStringPart);
-                    cell3.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[2].value, shareStringPart);
-                    cell4.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[11].value, shareStringPart);
-                    cell5.CellValue = new CellValue(index.ToString());
-                    
-                    cell2.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell3.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell4.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell5.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    
-                    Console.WriteLine(pd[0].value);
-                    Console.WriteLine(pd[1].value);
-                    Console.WriteLine(pd[2].value);
-                    Console.WriteLine(pd[3].value);
-                    Console.WriteLine(pd[11].value);
+                    Cell cell=InsertCellInWorksheet(symbs[i].ToString(), rowIndex, worksheetPart);
+                    index = InsertSharedStringItem(pd[i].value, shareStringPart);
+                    cell.CellValue = new CellValue(index.ToString());
+                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    worksheetPart.Worksheet.Save();
                 }
                 
-                // Save the new worksheet.
-                worksheetPart.Worksheet.Save();
+              
+                
                 
             }
         }
