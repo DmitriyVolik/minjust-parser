@@ -4,9 +4,9 @@ namespace minjust_parser.Core.Services
 {
     public class Helpers
     {
-        public static List<string> GetRFID(string input)
+        public static List<string> GetInfoUrl(string input, string data)
         {
-            var array = input.Split("\"rfId\":\"");
+            var array = input.Split($"\"{data}\":\"");
             List<string> response = new List<string>();
             for (int i = 1; i < array.Length; i++)
             {

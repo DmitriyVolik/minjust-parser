@@ -32,6 +32,10 @@ namespace minjust_parser.Core
             try
             {
                 IdNumbers=Excel.Read(config);
+                foreach (var item in IdNumbers)
+                {
+                    Console.WriteLine(item);
+                }
                 ParsedNumbers = FileWorker.ReadParsedNumbers();
             }
             catch (Exception)
