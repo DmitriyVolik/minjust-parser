@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using minjust_parser.Models;
@@ -75,10 +76,7 @@ namespace minjust_parser.Core.Services
                     cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
                     worksheetPart.Worksheet.Save();
                 }
-                
-              
-                
-                
+
             }
         }
         private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
@@ -170,41 +168,26 @@ namespace minjust_parser.Core.Services
                 }
                 // Insert the text into the SharedStringTablePart.
                 
-                
-                // Insert a new worksheet.
                 WorksheetPart worksheetPart=spreadSheet.WorkbookPart.Workbook.WorkbookPart.WorksheetParts.First();
-                //InsertWorksheet(spreadSheet.WorkbookPart);
-                
-                // Insert cell A1 into the new worksheet.
+
                 int index;
-                
-                Cell cell1 = InsertCellInWorksheet("A", 1, worksheetPart);
-                Cell cell2 = InsertCellInWorksheet("B", 1, worksheetPart);
-                Cell cell3 = InsertCellInWorksheet("C", 1, worksheetPart);
-                Cell cell4 = InsertCellInWorksheet("D", 1, worksheetPart);
-                Cell cell5 = InsertCellInWorksheet("E", 1, worksheetPart);
-                
-                // Set the value of cell A1.
-                index = InsertSharedStringItem("ИНН", shareStringPart);
-                cell1.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Прізвище, ім'я, по батькові", shareStringPart);
-                cell2.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Місцезнаходження", shareStringPart);
-                cell3.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Види діяльності", shareStringPart);
-                cell4.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Інформація для здійснення зв'язку", shareStringPart);
-                cell5.CellValue = new CellValue(index.ToString());
-                
-                cell1.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell2.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell3.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell4.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell5.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    
-                
-                // Save the new worksheet.
-                worksheetPart.Worksheet.Save();
+
+                string symbs = "ABCDE";
+
+                var titles = new string[5]
+                {
+                    "ИНН", "Прізвище, ім'я, по батькові", "Місцезнаходження", "Види діяльності",
+                    "Інформація для здійснення зв'язку"
+                };
+
+                for (int i = 0; i < 5; i++)
+                {
+                    Cell cell = InsertCellInWorksheet(symbs[i].ToString(), 1, worksheetPart);
+                    index = InsertSharedStringItem(titles[i], shareStringPart);
+                    cell.CellValue = new CellValue(index.ToString());
+                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    worksheetPart.Worksheet.Save();
+                }
             }
         }
     }
