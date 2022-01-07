@@ -11,6 +11,7 @@ namespace minjust_parser.Core.Services
 {
     public static class Excel
     {
+        private static string _symbs="ABCDEFGHIJKL";
         public static List<string> Read(Config config)
         {
             List<string> data = new List<string>();
@@ -66,11 +67,9 @@ namespace minjust_parser.Core.Services
                 
                 uint rowIndex = Convert.ToUInt32(count);
 
-                string symbs="ABCDEFGHIJKL";
-
                 for (int i = 0; i < 12; i++)
                 {
-                    Cell cell=InsertCellInWorksheet(symbs[i].ToString(), rowIndex, worksheetPart);
+                    Cell cell=InsertCellInWorksheet(_symbs[i].ToString(), rowIndex, worksheetPart);
                     index = InsertSharedStringItem(pd[i].value, shareStringPart);
                     cell.CellValue = new CellValue(index.ToString());
                     cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
@@ -172,17 +171,23 @@ namespace minjust_parser.Core.Services
 
                 int index;
 
-                string symbs = "ABCDE";
-
-                var titles = new string[5]
+                var titles = new string[12]
                 {
-                    "ИНН", "Прізвище, ім'я, по батькові", "Місцезнаходження", "Види діяльності",
+                    "Прізвище, ім'я, по батькові", "Місцезнаходження", "Види діяльності",
+                    "Дата державної реєстрації, дата та номер запису в Єдиному державному реєстрі про включення до Єдиного державного реєстру відомостей про фізичну особу-підприємця – у разі, коли державна реєстрація фізичної особи-підприємця була проведена до набрання чинності Законом України “Про державну реєстрацію юридичних осіб та фізичних осіб-підприємців”",
+                    "Дата та номер запису про проведення державної реєстрації",
+                    "Місцезнаходження реєстраційної справи",
+                    "Відомості, отримані в порядку інформаційної взаємодії між Єдиним державним реєстром юридичних осіб, фізичних осіб - підприємців та громадських формувань та інформаційними системами державних органів",
+                    "Прізвище, ім'я, по батькові особи, яка призначена управителем майна фізичної особи-підприємця",
+                    "Дата та номер запису про державну реєстрацію припинення підприємницької діяльності фізичної особи-підприємця, підстава внесення",
+                    "Дата та номер запису щодо відміни державної реєстрації припинення підприємницької діяльності фізичної особи-підприємця, підстава внесення",
+                    "Дата відкриття виконавчого провадження щодо фізичної особи-підприємця (для незавершених виконавчих проваджень)",
                     "Інформація для здійснення зв'язку"
                 };
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 12; i++)
                 {
-                    Cell cell = InsertCellInWorksheet(symbs[i].ToString(), 1, worksheetPart);
+                    Cell cell = InsertCellInWorksheet(_symbs[i].ToString(), 1, worksheetPart);
                     index = InsertSharedStringItem(titles[i], shareStringPart);
                     cell.CellValue = new CellValue(index.ToString());
                     cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
