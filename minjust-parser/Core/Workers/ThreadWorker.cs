@@ -62,9 +62,7 @@ namespace minjust_parser.Core.Workers
                 IdentityNumbers.RemoveAt(0);
 
                 Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
-                
-                
-                
+
                 try
                 {
                     if (!ParsedNumbers.Contains(SearchName))
@@ -103,7 +101,7 @@ namespace minjust_parser.Core.Workers
                         {
                             if (outputStates[i]=="припинено")
                             {
-                                break;
+                                //break;
                             }
                             
                             request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(outputRfIds[i])}");
@@ -138,17 +136,16 @@ namespace minjust_parser.Core.Workers
                                 Console.WriteLine($"{SearchName}: ИДЕНТИФИЦИРОВАН И ЗАПИСАН КАК \"{person[0].value}\"", ConsoleColor.Yellow);
 
                                 config.PersonOutCounter++;
-                                ParsedNumbers.Add(SearchName);
-                                FileWorker.WriteParsedNumber(SearchName);
+                                
                                 FileWorker.SaveConfig(config);
                             }
                         }
                         if (outputRfIds.Count==0)
                         {
                             Console.WriteLine($"{SearchName}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
-                            ParsedNumbers.Add(SearchName);
-                            FileWorker.WriteParsedNumber(SearchName);
                         }
+                        ParsedNumbers.Add(SearchName);
+                        FileWorker.WriteParsedNumber(SearchName);
                     }
                     else
                     {
