@@ -12,24 +12,24 @@ namespace minjust_parser.Core.Workers
 {
     public class ThreadWorker
     {
-        public ThreadWorker(ref Config config, ref Captcha captcha, ref List<string> IdentityNumbers, ref List<string> ParsedNumbers)
+        public ThreadWorker(ref Config config, ref Captcha captcha, ref List<string> Names, ref List<string> ParsedNames)
         {
             this.config = config;
             this.captcha = captcha;
-            this.IdentityNumbers = IdentityNumbers;
-            this.ParsedNumbers = ParsedNumbers;
+            this.Names = Names;
+            this.ParsedNames = ParsedNames;
         }
         Captcha captcha { get; set; } = null;
         Config config { get; set; } = null;
-        List<string> IdentityNumbers { get; set; } = null;
-        List<string> ParsedNumbers { get; set; } = null;
+        List<string> Names { get; set; } = null;
+        List<string> ParsedNames { get; set; } = null;
         string SearchName { get; set; } = "";
         WebProxy proxy { get; set; } = null;
         Random rand = new Random();
         WebRequest request = null;
         public void StartThread()
         {
-            while (IdentityNumbers.Count > 0)
+            while (Names.Count > 0)
             {
                 if (config.IsProxy)
                 {
@@ -57,15 +57,15 @@ namespace minjust_parser.Core.Workers
                     }
                 }
 
-                SearchName = IdentityNumbers[0];
-                var temp = IdentityNumbers[0];
-                IdentityNumbers.RemoveAt(0);
+                SearchName = Names[0];
+                var temp = Names[0];
+                Names.RemoveAt(0);
 
-                Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
+                Console.WriteLine($"Осталось парсить {Names.Count} номеров", ConsoleColor.Gray);
 
                 try
                 {
-                    if (!ParsedNumbers.Contains(SearchName))
+                    if (!ParsedNames.Contains(SearchName))
                     {
                         Console.WriteLine($"Решаю капчу для {SearchName}...");
 
@@ -144,8 +144,8 @@ namespace minjust_parser.Core.Workers
                         {
                             Console.WriteLine($"{SearchName}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
                         }
-                        ParsedNumbers.Add(SearchName);
-                        FileWorker.WriteParsedNumber(SearchName);
+                        ParsedNames.Add(SearchName);
+                        FileWorker.WriteParsedName(SearchName);
                     }
                     else
                     {
@@ -156,10 +156,11 @@ namespace minjust_parser.Core.Workers
                 catch (Exception)
                 {
                     Console.WriteLine($"Ошибка подключения. {temp} добавлен в конец очереди. Парсинг другого элемента");
-                    IdentityNumbers.Add(temp);
+                    Names.Add(temp);
                     continue;
                 }
             }
+            
             Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId} завершил работу.");
         }
     }
