@@ -8,7 +8,7 @@ namespace minjust_parser.Models
     {
         public long PersonOutCounter { get; set; } = 0;
 
-        public string FilePathInput { get; set; } = "input.xlsx";
+        public string FilePathInput { get; set; } = "fops.txt";
 
         public string FilePathOutput { get; set; } = "output.xlsx";
 

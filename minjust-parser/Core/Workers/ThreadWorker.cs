@@ -61,7 +61,7 @@ namespace minjust_parser.Core.Workers
                 var temp = Names[0];
                 Names.RemoveAt(0);
 
-                Console.WriteLine($"Осталось парсить {Names.Count} номеров", ConsoleColor.Gray);
+                Console.WriteLine($"Осталось парсить {Names.Count} значений", ConsoleColor.Gray);
 
                 try
                 {
