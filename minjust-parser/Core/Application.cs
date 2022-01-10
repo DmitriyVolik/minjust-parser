@@ -16,7 +16,7 @@ namespace minjust_parser.Core
 {
     public class Application
     {
-
+        
         public Application()
         {
             config = FileWorker.LoadConfig().Result;
@@ -31,8 +31,8 @@ namespace minjust_parser.Core
             }
             try
             {
-                IdNumbers=Excel.Read(config);
-                ParsedNumbers = FileWorker.ReadParsedNumbers();
+                SearchNames = File.ReadAllLines("fops.txt").ToList();
+                ParsedNames = FileWorker.ReadParsedNames();
             }
             catch (Exception)
             {
@@ -43,19 +43,21 @@ namespace minjust_parser.Core
         public Config config = null;
         public Captcha captcha = null;
 
-        public List<string> IdNumbers = new List<string>();
-        public List<string> ParsedNumbers = new List<string>();
+        public List<string> SearchNames = new List<string>();
+        public List<string> ParsedNames = new List<string>();
+
         public void Start()
         {
             Excel.WriteStartPattern(config.FilePathOutput);
 
             for (int i = 0; i < config.ThreadCount; i++)
             {
-                ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref IdNumbers, ref ParsedNumbers);
+                ThreadWorker worker = new ThreadWorker(ref config, ref captcha, ref SearchNames, ref ParsedNames);
                 Thread thread = new Thread(new ThreadStart(worker.StartThread));
                 thread.Start();
                 Thread.Sleep(500);
             }
         }
+
     }
 }

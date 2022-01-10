@@ -27,20 +27,22 @@ namespace minjust_parser.Core.Workers
         {
             await File.WriteAllTextAsync("config.json", JsonWorker<Config>.ObjToJson(config));
         }
-
-        public static List<string> ReadParsedNumbers()
+        
+        
+        
+        public static List<string> ReadParsedNames()
         {
             List<string> data = new List<string>(); 
 
-            if (!File.Exists("ParsedNumbers.txt"))
+            if (!File.Exists("ParsedNames.txt"))
             {
-                File.Create("ParsedNumbers.txt");
+                File.Create("ParsedNames.txt");
                 return data;
             }
 
             string str;
 
-            using (StreamReader sr = new StreamReader("ParsedNumbers.txt"))
+            using (StreamReader sr = new StreamReader("ParsedNames.txt"))
             {
                 while ((str=sr.ReadLine())!=null)
                 {
@@ -51,9 +53,9 @@ namespace minjust_parser.Core.Workers
             return data;
         }
 
-        public static void WriteParsedNumber(string number)
+        public static void WriteParsedName(string number)
         {
-            File.AppendAllTextAsync("ParsedNumbers.txt", number + '\n');
+            File.AppendAllTextAsync("ParsedNames.txt", number + '\n');
         }
     }
 }

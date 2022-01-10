@@ -24,7 +24,7 @@ namespace minjust_parser
             }
             catch (System.Exception)
             {
-
+    
             }
             System.Console.ForegroundColor = color;
             System.Console.WriteLine(tempstr);

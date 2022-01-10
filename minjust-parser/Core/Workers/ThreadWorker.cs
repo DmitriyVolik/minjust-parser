@@ -12,24 +12,24 @@ namespace minjust_parser.Core.Workers
 {
     public class ThreadWorker
     {
-        public ThreadWorker(ref Config config, ref Captcha captcha, ref List<string> IdentityNumbers, ref List<string> ParsedNumbers)
+        public ThreadWorker(ref Config config, ref Captcha captcha, ref List<string> Names, ref List<string> ParsedNames)
         {
             this.config = config;
             this.captcha = captcha;
-            this.IdentityNumbers = IdentityNumbers;
-            this.ParsedNumbers = ParsedNumbers;
+            this.Names = Names;
+            this.ParsedNames = ParsedNames;
         }
         Captcha captcha { get; set; } = null;
         Config config { get; set; } = null;
-        List<string> IdentityNumbers { get; set; } = null;
-        List<string> ParsedNumbers { get; set; } = null;
-        string WorkIdentityNumber { get; set; } = "";
+        List<string> Names { get; set; } = null;
+        List<string> ParsedNames { get; set; } = null;
+        string SearchName { get; set; } = "";
         WebProxy proxy { get; set; } = null;
         Random rand = new Random();
         WebRequest request = null;
         public void StartThread()
         {
-            while (IdentityNumbers.Count > 0)
+            while (Names.Count > 0)
             {
                 if (config.IsProxy)
                 {
@@ -57,24 +57,24 @@ namespace minjust_parser.Core.Workers
                     }
                 }
 
-                WorkIdentityNumber = IdentityNumbers[0];
-                var temp = IdentityNumbers[0];
-                IdentityNumbers.RemoveAt(0);
+                SearchName = Names[0];
+                var temp = Names[0];
+                Names.RemoveAt(0);
 
-                Console.WriteLine($"Осталось парсить {IdentityNumbers.Count} номеров", ConsoleColor.Gray);
+                Console.WriteLine($"Осталось парсить {Names.Count} номеров", ConsoleColor.Gray);
 
                 try
                 {
-                    if (!ParsedNumbers.Contains(WorkIdentityNumber))
+                    if (!ParsedNames.Contains(SearchName))
                     {
-                        Console.WriteLine($"Решаю капчу для {WorkIdentityNumber}...");
+                        Console.WriteLine($"Решаю капчу для {SearchName}...");
 
                         var captchaToken = captcha.SolveReCaptcha();
+                        
+                        Console.WriteLine($"Капча для {SearchName} решена!", ConsoleColor.Green);
+                        Console.WriteLine($"Начинаю парсинг данных для {SearchName}.");
 
-                        Console.WriteLine($"Капча для {WorkIdentityNumber} решена!", ConsoleColor.Green);
-                        Console.WriteLine($"Начинаю парсинг данных для {WorkIdentityNumber}.");
-
-                        request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={WorkIdentityNumber}&c={captchaToken}");
+                        request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={HttpUtility.UrlEncode(SearchName)}&c={captchaToken}");
 
                         request.Proxy = proxy;
 
@@ -93,13 +93,19 @@ namespace minjust_parser.Core.Workers
                         }
                         response.Close();
 
-                        var output = Helpers.GetRFID(responseStr);
+                        var outputRfIds = Helpers.GetInfoUrl(responseStr, "rfId");
+                        var outputStates = Helpers.GetInfoUrl(responseStr, "state");
 
-                        for (int i = 0; i < output.Count; i++)
+                        for (int i = 0; i < outputRfIds.Count; i++)
                         {
-                            request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(output[i])}");
+                            
+                            if (outputStates[i]=="припинено")
+                            {
+                                continue;
+                            }
+                            
+                            request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(outputRfIds[i])}");
                             response = request.GetResponse();
-
                             string tempResponse;
 
                             using (Stream stream = response.GetResponseStream())
@@ -110,14 +116,12 @@ namespace minjust_parser.Core.Workers
                                 }
                             }
                             response.Close();
-
-                            Console.WriteLine(tempResponse);
                             var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
                             if (person.Count != 0)
                             {
                                 try
                                 {
-                                    Excel.Write(person, config.FilePathOutput, config.PersonOutCounter + 2, WorkIdentityNumber);
+                                    Excel.Write(person, config.FilePathOutput, config.PersonOutCounter + 2, SearchName);
                                 }
                                 catch (Exception)
                                 {
@@ -125,36 +129,36 @@ namespace minjust_parser.Core.Workers
                                     throw;
                                 }
 
-                                Console.WriteLine($"Данные { WorkIdentityNumber} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
+                                Console.WriteLine($"Данные { SearchName} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
 
-                                Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИЦИРОВАН И ЗАПИСАН КАК \"{person[0].value}\"", ConsoleColor.Yellow);
+                                Console.WriteLine($"{SearchName}:ЗАПИСАН", ConsoleColor.Yellow);
 
                                 config.PersonOutCounter++;
-                                ParsedNumbers.Add(WorkIdentityNumber);
-                                FileWorker.WriteParsedNumber(WorkIdentityNumber);
+                                
                                 FileWorker.SaveConfig(config);
                             }
                         }
-                        if (output.Count==0)
+                        if (outputRfIds.Count==0)
                         {
-                            Console.WriteLine($"{WorkIdentityNumber}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
-                            ParsedNumbers.Add(WorkIdentityNumber);
-                            FileWorker.WriteParsedNumber(WorkIdentityNumber);
+                            Console.WriteLine($"{SearchName}: ИДЕНТИФИКАЦИОННЫЙ НОМЕР НЕ СОДЕРЖИТ ИНФОРМАЦИИ (ПУСТ)", ConsoleColor.Red);
                         }
+                        ParsedNames.Add(SearchName);
+                        FileWorker.WriteParsedName(SearchName);
                     }
                     else
                     {
-                        Console.WriteLine($"{WorkIdentityNumber} уже содержится в {config.FilePathOutput}");
+                        Console.WriteLine($"{SearchName} уже содержится в {config.FilePathOutput}");
                         continue;
                     }
                 }
                 catch (Exception)
                 {
                     Console.WriteLine($"Ошибка подключения. {temp} добавлен в конец очереди. Парсинг другого элемента");
-                    IdentityNumbers.Add(temp);
+                    Names.Add(temp);
                     continue;
                 }
             }
+            
             Console.WriteLine($"Поток {Thread.CurrentThread.ManagedThreadId} завершил работу.");
         }
     }

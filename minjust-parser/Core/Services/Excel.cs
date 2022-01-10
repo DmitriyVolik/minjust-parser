@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.ExtendedProperties;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using minjust_parser.Models;
@@ -10,6 +11,7 @@ namespace minjust_parser.Core.Services
 {
     public static class Excel
     {
+        private static string _symbs="ABCDEFGHIJKL";
         public static List<string> Read(Config config)
         {
             List<string> data = new List<string>();
@@ -30,7 +32,7 @@ namespace minjust_parser.Core.Services
                             break;
                         }
 
-                        Console.WriteLine($"ИНН {c.CellValue.Text} добавлен в очередь для парсинга.");
+                        Console.WriteLine($"{c.CellValue.Text} добавлен в очередь для парсинга.");
                         text = c.CellValue.Text;
                         data.Add(text);
                     }
@@ -39,7 +41,7 @@ namespace minjust_parser.Core.Services
 
             return data;
         }
-        public static void Write(List<PersonData> pd, string filePath, long count, string idNumber, bool idOnly=false)
+        public static void Write(List<PersonData> pd, string filePath, long count, string idNumber)
         {
             using (SpreadsheetDocument spreadSheet = SpreadsheetDocument.Open(filePath, true))
             {
@@ -64,43 +66,16 @@ namespace minjust_parser.Core.Services
                 int index;
                 
                 uint rowIndex = Convert.ToUInt32(count);
-                
-                Cell cell1 = InsertCellInWorksheet("A", rowIndex, worksheetPart);
-                index = InsertSharedStringItem(idNumber, shareStringPart);
-                cell1.CellValue = new CellValue(index.ToString());
-                cell1.DataType = new EnumValue<CellValues>(CellValues.SharedString);
 
-                if (!idOnly)
+                for (int i = 0; i < 12; i++)
                 {
-                    Cell cell2 = InsertCellInWorksheet("B", rowIndex, worksheetPart);
-                    Cell cell3 = InsertCellInWorksheet("C", rowIndex, worksheetPart);
-                    Cell cell4 = InsertCellInWorksheet("D", rowIndex, worksheetPart);
-                    Cell cell5 = InsertCellInWorksheet("E", rowIndex, worksheetPart);
-                    
-                    index = InsertSharedStringItem(pd[0].value, shareStringPart);
-                    cell2.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[1].value, shareStringPart);
-                    cell3.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[2].value, shareStringPart);
-                    cell4.CellValue = new CellValue(index.ToString());
-                    index = InsertSharedStringItem(pd[11].value, shareStringPart);
-                    cell5.CellValue = new CellValue(index.ToString());
-                    
-                    cell2.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell3.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell4.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    cell5.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    
-                    Console.WriteLine(pd[0].value);
-                    Console.WriteLine(pd[1].value);
-                    Console.WriteLine(pd[2].value);
-                    Console.WriteLine(pd[3].value);
-                    Console.WriteLine(pd[11].value);
+                    Cell cell=InsertCellInWorksheet(_symbs[i].ToString(), rowIndex, worksheetPart);
+                    index = InsertSharedStringItem(pd[i].value, shareStringPart);
+                    cell.CellValue = new CellValue(index.ToString());
+                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    worksheetPart.Worksheet.Save();
                 }
-                
-                // Save the new worksheet.
-                worksheetPart.Worksheet.Save();
-                
+
             }
         }
         private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
@@ -192,41 +167,32 @@ namespace minjust_parser.Core.Services
                 }
                 // Insert the text into the SharedStringTablePart.
                 
-                
-                // Insert a new worksheet.
                 WorksheetPart worksheetPart=spreadSheet.WorkbookPart.Workbook.WorkbookPart.WorksheetParts.First();
-                //InsertWorksheet(spreadSheet.WorkbookPart);
-                
-                // Insert cell A1 into the new worksheet.
+
                 int index;
-                
-                Cell cell1 = InsertCellInWorksheet("A", 1, worksheetPart);
-                Cell cell2 = InsertCellInWorksheet("B", 1, worksheetPart);
-                Cell cell3 = InsertCellInWorksheet("C", 1, worksheetPart);
-                Cell cell4 = InsertCellInWorksheet("D", 1, worksheetPart);
-                Cell cell5 = InsertCellInWorksheet("E", 1, worksheetPart);
-                
-                // Set the value of cell A1.
-                index = InsertSharedStringItem("ИНН", shareStringPart);
-                cell1.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Прізвище, ім'я, по батькові", shareStringPart);
-                cell2.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Місцезнаходження", shareStringPart);
-                cell3.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Види діяльності", shareStringPart);
-                cell4.CellValue = new CellValue(index.ToString());
-                index = InsertSharedStringItem("Інформація для здійснення зв'язку", shareStringPart);
-                cell5.CellValue = new CellValue(index.ToString());
-                
-                cell1.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell2.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell3.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell4.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                cell5.DataType = new EnumValue<CellValues>(CellValues.SharedString);
-                    
-                
-                // Save the new worksheet.
-                worksheetPart.Worksheet.Save();
+
+                var titles = new string[12]
+                {
+                    "Прізвище, ім'я, по батькові", "Місцезнаходження", "Види діяльності",
+                    "Дата державної реєстрації, дата та номер запису в Єдиному державному реєстрі про включення до Єдиного державного реєстру відомостей про фізичну особу-підприємця – у разі, коли державна реєстрація фізичної особи-підприємця була проведена до набрання чинності Законом України “Про державну реєстрацію юридичних осіб та фізичних осіб-підприємців”",
+                    "Дата та номер запису про проведення державної реєстрації",
+                    "Місцезнаходження реєстраційної справи",
+                    "Відомості, отримані в порядку інформаційної взаємодії між Єдиним державним реєстром юридичних осіб, фізичних осіб - підприємців та громадських формувань та інформаційними системами державних органів",
+                    "Прізвище, ім'я, по батькові особи, яка призначена управителем майна фізичної особи-підприємця",
+                    "Дата та номер запису про державну реєстрацію припинення підприємницької діяльності фізичної особи-підприємця, підстава внесення",
+                    "Дата та номер запису щодо відміни державної реєстрації припинення підприємницької діяльності фізичної особи-підприємця, підстава внесення",
+                    "Дата відкриття виконавчого провадження щодо фізичної особи-підприємця (для незавершених виконавчих проваджень)",
+                    "Інформація для здійснення зв'язку"
+                };
+
+                for (int i = 0; i < 12; i++)
+                {
+                    Cell cell = InsertCellInWorksheet(_symbs[i].ToString(), 1, worksheetPart);
+                    index = InsertSharedStringItem(titles[i], shareStringPart);
+                    cell.CellValue = new CellValue(index.ToString());
+                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    worksheetPart.Worksheet.Save();
+                }
             }
         }
     }
