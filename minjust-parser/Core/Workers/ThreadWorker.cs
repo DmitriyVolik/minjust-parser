@@ -73,7 +73,6 @@ namespace minjust_parser.Core.Workers
                         
                         Console.WriteLine($"Капча для {SearchName} решена!", ConsoleColor.Green);
                         Console.WriteLine($"Начинаю парсинг данных для {SearchName}.");
-                        SearchName = "Волік Дмитро";
 
                         request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/search?person={HttpUtility.UrlEncode(SearchName)}&c={captchaToken}");
 
@@ -101,7 +100,7 @@ namespace minjust_parser.Core.Workers
                         {
                             if (outputStates[i]=="припинено")
                             {
-                                //break;
+                                break;
                             }
                             
                             request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(outputRfIds[i])}");
