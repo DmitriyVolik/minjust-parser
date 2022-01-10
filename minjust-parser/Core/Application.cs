@@ -32,11 +32,6 @@ namespace minjust_parser.Core
             try
             {
                 SearchNames = File.ReadAllLines("fops.txt").ToList();
-
-                foreach (var item in SearchNames)
-                {
-                    Console.WriteLine(item);
-                }
                 ParsedNames = FileWorker.ReadParsedNames();
             }
             catch (Exception)

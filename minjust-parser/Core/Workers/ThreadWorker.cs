@@ -95,12 +95,13 @@ namespace minjust_parser.Core.Workers
 
                         var outputRfIds = Helpers.GetInfoUrl(responseStr, "rfId");
                         var outputStates = Helpers.GetInfoUrl(responseStr, "state");
-                        
+
                         for (int i = 0; i < outputRfIds.Count; i++)
                         {
+                            
                             if (outputStates[i]=="припинено")
                             {
-                                break;
+                                continue;
                             }
                             
                             request = WebRequest.Create($"https://usr.minjust.gov.ua/USRWebAPI/api/public/detail?rfId={HttpUtility.UrlEncode(outputRfIds[i])}");
@@ -115,8 +116,6 @@ namespace minjust_parser.Core.Workers
                                 }
                             }
                             response.Close();
-
-                            Console.WriteLine(tempResponse);
                             var person = JsonWorker<List<PersonData>>.JsonToObj(tempResponse);
                             if (person.Count != 0)
                             {
@@ -132,7 +131,7 @@ namespace minjust_parser.Core.Workers
 
                                 Console.WriteLine($"Данные { SearchName} занесены в {config.FilePathOutput} файл.", ConsoleColor.Green);
 
-                                Console.WriteLine($"{SearchName}: ИДЕНТИФИЦИРОВАН И ЗАПИСАН КАК \"{person[0].value}\"", ConsoleColor.Yellow);
+                                Console.WriteLine($"{SearchName}:ЗАПИСАН", ConsoleColor.Yellow);
 
                                 config.PersonOutCounter++;
                                 
